@@ -1,0 +1,35 @@
+[workspace]
+authors = ["Taylor Denouden <taylor.denouden@hakai.org>"]
+channels = ["conda-forge"]
+name = "skysat_stereo"
+platforms = ["linux-64"]
+version = "0.1.0"
+preview = ["pixi-build"]
+
+[activation.env]
+PATH = "$PATH:/home/acouser/StereoPipeline-3.2.0-2023-01-01-x86_64-Linux/bin"
+
+[tasks]
+
+[dependencies]
+scipy = ">=1.17.1,<2"
+numpy = ">=1.26.4,<2"
+pandas = ">=2.3.3,<3"
+matplotlib = ">=3.8,<3.9"
+gdal = ">=3.7.0,<4"
+rasterio = ">=1.3.8,<2"
+geopandas = ">=0.14.4,<0.15"
+pygeos = ">=0.14,<0.15"
+shapely = ">=2.0.1,<3"
+contextily = ">=1.7.0,<2"
+descartes = ">=1.1.0,<2"
+psutil = ">=7.2.2,<8"
+pyquaternion = ">=0.9.9,<0.10"
+
+[pypi-dependencies]
+pygeotools = { git = "https://github.com/dshean/pygeotools.git" }
+demcoreg = { git = "https://github.com/dshean/demcoreg.git" }
+imview = { git = "https://github.com/tayden/imview.git", rev = "isprs_version", editable = true }
+rpcm = { git = "https://github.com/cmla/rpcm.git" }
+p-tqdm = ">=1.4.2, <2"
+skysat-stereo = { path = "/home/acouser/skysat_stereo", editable = true }

@@ -131,3 +131,6 @@ dmypy.json
 #src folder for pip installs
 ./src/
 
+# pixi environments
+.pixi/*
+!.pixi/config.toml
