@@ -157,7 +157,7 @@ def main():
 
     print("Computing Target UTM zones for orthorectification")
     gdf = gpd.read_file(bound_fn)
-    clon,clat = [gdf.centroid.x.values,gdf.centroid.y.values]
+    clon,clat = [gdf.centroid.x.values[0],gdf.centroid.y.values[0]]
     epsg_code = f'EPSG:{geo.compute_epsg(clon,clat)}'
     print(f"Detected UTM zone is {epsg_code}")
     if not os.path.exists(bound_buffer_fn):

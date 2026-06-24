@@ -6,6 +6,7 @@ import pandas as pd
 import geopandas as gpd
 from pyproj import Proj, transform, Transformer
 from rpcm import rpc_from_geotiff
+from osgeo import gdal
 from distutils.spawn import find_executable
 import subprocess
 import ast
@@ -214,21 +215,38 @@ def clean_gcp(gcp_list,outdir):
 def rpc2map (img,imgx,imgy,imgz=0):
     """
     generate 3D world coordinates from input image pixel coordinates using the RPC model
-    See rpcm: https://github.com/cmla/rpcm/blob/master/rpcm/rpc_model.py for implementation
+
+    Uses GDAL's RPC transformer (the same robust C implementation used by ASP)
+    rather than rpcm's pure-python iterative localization. The latter diverges and
+    raises MaxLocalizationIterationsError when image corners project just outside the
+    RPC's valid normalized domain, which happens for some SkySat scenes.
+
     Parameters
     ----------
     img: str
         path to image file containing RPC in in gdal tags
-    imgx,imgy,imgz: int/float
-        Image x,y in pixel units, z: height in world coordinates
+    imgx,imgy,imgz: int/float or array-like
+        Image x,y in pixel units, z: height in world coordinates. imgz may be a
+        scalar (applied to all points) or a per-point array.
     Returns
     ----------
     mx,my: np.arrays
         numpy arrays containing longitudes (mx) and latitudes (my) in geographic (EPSG:4326) coordinates
     """
-    rpc = rpc_from_geotiff(img)
-    mx,my = rpc.localization(imgx,imgy,imgz)
-    return mx,my
+    imgx = np.atleast_1d(np.asarray(imgx, dtype=float))
+    imgy = np.atleast_1d(np.asarray(imgy, dtype=float))
+    imgz = np.atleast_1d(np.asarray(imgz, dtype=float))
+    if imgz.size == 1:
+        imgz = np.repeat(imgz, imgx.size)
+    ds = gdal.Open(img)
+    transformer = gdal.Transformer(ds, None, ['METHOD=RPC'])
+    # bDstToSrc=0 transforms pixel/line(+height) -> georeferenced lon/lat
+    coords, success = transformer.TransformPoints(0, list(zip(imgx.tolist(), imgy.tolist(), imgz.tolist())))
+    if not all(success):
+        raise RuntimeError(f"GDAL RPC localization failed for {img}")
+    coords = np.asarray(coords)
+    mx, my = coords[:, 0], coords[:, 1]
+    return mx, my
 
 def get_ba_opts(ba_prefix, camera_weight=0, overlap_list=None, overlap_limit=None, initial_transform=None, input_adjustments=None, flavor='general_ba', session='nadirpinhole', gcp_transform=False,num_iterations=2000,lon_lat_lim=None,elevation_limit=None):
     """

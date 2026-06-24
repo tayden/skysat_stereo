@@ -2,6 +2,7 @@
 
 import os,sys,glob,re,shutil
 import numpy as np
+import rasterio
 import geopandas as gpd
 import pandas as pd
 from pygeotools.lib import iolib,malib
@@ -252,7 +253,10 @@ def skysat_preprocess(img_folder,mode,sampling=None,frame_index_fn=None,product_
     fl = [553846.153846]*n
     cx = [1280]*n
     cy = [540]*n
-    ht_datum = [malib.get_stats_dict(iolib.fn_getma(dem))['median']]*n # use this value for height where DEM has no-data
+    # use the DEM median for height where DEM has no-data
+    with rasterio.open(dem) as src:
+        dem_median = float(np.ma.median(src.read(1, masked=True)))
+    ht_datum = [dem_median]*n
     gcp_std = [1]*n
     datum = ['WGS84']*n
     refdem = [dem]*n

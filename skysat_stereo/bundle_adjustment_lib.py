@@ -6,6 +6,7 @@ from distutils.spawn import find_executable
 from pygeotools.lib import iolib,malib
 import geopandas as gpd
 import numpy as np
+import rasterio
 from datetime import datetime
 import pandas as pd
 from multiprocessing import cpu_count
@@ -166,9 +167,9 @@ def bundle_adjust_stable(img,ba_prefix,cam=None,session='rpc',initial_transform=
     print(f"Camera weight is {cam_wt}")
     
     if dem:
-        dem = iolib.fn_getma(dem)
-        dem_stats = malib.get_stats_dict(dem)
-        min_elev,max_elev = [dem_stats['min']-500,dem_stats['max']+500] 
+        with rasterio.open(dem) as src:
+            dem_ma = src.read(1, masked=True)
+            min_elev,max_elev = [float(dem_ma.min())-500,float(dem_ma.max())+500]
         dem = None
     if mode == 'full_triplet':
         if overlap_list is None:
