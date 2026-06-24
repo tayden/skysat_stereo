@@ -12,11 +12,8 @@ import pandas as pd
 from multiprocessing import cpu_count
 
 def run_cmd(bin, args, **kw):
-    # Note, need to add full executable
-    # from dshean/vmap.py
-    #binpath = os.path.join('/home/sbhushan/src/StereoPipeline/bin',bin)
-    #binpath = find_executable(bin)
-    binpath = '/nobackupp16/swbuild3/sbhusha1/StereoPipeline-3.1.1-alpha-2022-10-31-x86_64-Linux/bin/bundle_adjust'
+    # Resolve the ASP executable from PATH (the pixi/conda env provides it).
+    binpath = shutil.which(bin)
     if binpath is None:
         msg = ("Unable to find executable %s\n"
         "Install ASP and ensure it is in your PATH env variable\n"
@@ -34,7 +31,7 @@ def run_cmd(bin, args, **kw):
     except OSError as e:
         raise Exception('%s: %s' % (binpath, e))
     if code != 0:
-        raise Exception('ASP step ' + kw['msg'] + ' failed')
+        raise Exception('ASP step %s (%s) failed with code %d' % (kw.get('msg', bin), binpath, code))
         
 
 def get_ba_opts(ba_prefix, ip_per_tile=4000,camera_weight=None,translation_weight=0.4,rotation_weight=0,fixed_cam_idx=None,overlap_list=None, robust_threshold=None, overlap_limit=None, initial_transform=None, input_adjustments=None, flavor='general_ba', session='nadirpinhole', gcp_transform=False,num_iterations=2000,num_pass=2,lon_lat_limit=None,elevation_limit=None):

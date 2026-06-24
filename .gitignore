@@ -134,3 +134,6 @@ dmypy.json
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+
+# local data: input scenes, DEMs, AOIs, and pipeline output
+data/
