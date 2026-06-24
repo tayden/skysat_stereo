@@ -296,7 +296,12 @@ def get_ba_opts(ba_prefix, camera_weight=0, overlap_list=None, overlap_limit=Non
     ba_opt.extend(['--ip-num-ransac-iterations', '1000'])
     ba_opt.extend(['--skip-rough-homography'])
     ba_opt.extend(['--min-triangulation-angle', '0.0001'])
-    ba_opt.extend(['--save-cnet-as-csv'])
+    # ASP 3.7 removed --save-cnet-as-csv; --save-cnet-as-gcp writes the control
+    # network in GCP format (xyz sigma defaults to "1 1 1" for non-GCP points),
+    # which is what prepare_virtual_gcp() parses. Outliers are filtered out, but
+    # the virtual-GCP call uses num_passes=1 so no outlier pass runs and the GCP
+    # rows stay index-aligned with the residual pointmap rows.
+    ba_opt.extend(['--save-cnet-as-gcp'])
     ba_opt.extend(['--individually-normalize'])
     ba_opt.extend(['--camera-weight', str(camera_weight)])
     ba_opt.extend(['-t', session])
@@ -1333,20 +1338,20 @@ def virtual_gcp_ba(img_list,cam_list,overlap_list,session,ba_prefix,
     ## Assume for now exists in a directory
     
     # step 2: run bundle adjust with zero iterations and only 1 pass
-    ## this will produce the pointmap file and the cnet.csv file #init_reproj_fn,#cnet_fn
+    ## this will produce the pointmap file and the cnet.gcp file #init_reproj_fn,#cnet_fn
     cnet_ba_opt =  get_ba_opts(
             ba_prefix, session=session,num_iterations=0,num_pass=1,overlap_list=overlap_list,camera_weight=0)
     ba_args = img_list + cam_list
     print("Building control network and pointmap files for virtual GCP creation")
     run_cmd('bundle_adjust', cnet_ba_opt + ba_args)
     try:
-        cnet_fn = glob.glob(ba_prefix+'*cnet.csv')[0]
+        cnet_fn = glob.glob(ba_prefix+'*cnet.gcp')[0]
     except:
         print("No control network found, exiting")
         sys.exit()
-    
+
     try:
-        init_reproj_fn = glob.glob(ba_prefix+'*initial*no_loss_*pointmap*.csv')[0]
+        init_reproj_fn = glob.glob(ba_prefix+'*initial*residuals*pointmap*.csv')[0]
     except:
         print("No initial error pointmap found,exiting")
         sys.exit()
