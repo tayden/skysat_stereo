@@ -51,11 +51,10 @@ Figure 2: Relative and absolute accuracy before (using Planet RPCs) and after th
 Figure 3: Sample products from SkySat video collection over Mt. St. Helen's crater (after `skysat_stereo` correction workflow). These final products were derived from L1A imagery that is &copy; Planet, 2019 (Planet Team, 2017).
 
 ## Dependencies
-- See [environment.yml file](/environment.yml) for complete list of Python packages with pinned version numbers.
-- [NASA Ames Stereo Pipeline v 3.0.1 alpha (April 22 2022)](https://stereopipeline.readthedocs.io/en/latest/)
+- All dependencies are managed with [pixi](https://pixi.sh) and pinned in [`pixi.toml`](/pixi.toml) (locked in [`pixi.lock`](/pixi.lock)). This includes the [NASA Ames Stereo Pipeline](https://stereopipeline.readthedocs.io/en/latest/) (`stereo-pipeline`), which is installed from the `nasa-ames-stereo-pipeline` conda channel — no separate ASP download is required.
 
 ## Installation
-Please see the [install instructions](/docs/install_instructions.md).
+Please see the [install instructions](/docs/install_instructions.md). In short: install [pixi](https://pixi.sh), then run `pixi install` from the repository root.
 
 Notes:
 * These tools were developed and tested on a dedicated [Broadwell node](https://www.nas.nasa.gov/hecc/resources/pleiades.html) on the NASA Pleiades supercomputer, running SUSE Linux Enterprise Server. 
