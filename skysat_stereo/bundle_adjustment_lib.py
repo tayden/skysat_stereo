@@ -52,10 +52,12 @@ def get_ba_opts(ba_prefix, ip_per_tile=4000,camera_weight=None,translation_weigh
     ba_opt.extend(['--skip-rough-homography'])
     ba_opt.extend(['--min-triangulation-angle', '0.0001'])
 
-    # Save control network created from match points
-    ba_opt.extend(['--save-cnet-as-csv'])
+    # Note: ASP <=3.6 had --save-cnet-as-csv to dump the control network as CSV.
+    # ASP 3.7+ removed it (use --output-cnet-type instead). This path only
+    # consumes the auto-generated *residuals*pointmap*.csv files, not the cnet
+    # CSV, so the flag is simply dropped here.
 
-    # Individually normalize images to properly stretch constrant 
+    # Individually normalize images to properly stretch constrant
     # Helpful in keypoint detection
     ba_opt.extend(['--individually-normalize'])
 
