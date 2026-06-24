@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "skysat_stereo"
+version = "0.1.0"
+description = "Library for DEM generation workflows from Planet SkySat-C imagery"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+authors = [
+    { name = "Shashank Bhushan and Team 3D", email = "sbaglapl@uw.edu" },
+    { name = "Taylor Denouden", email = "taylor.denouden@hakai.org" },
+]
+urls = { Homepage = "https://github.com/uw-cryo/skysat_stereo.git" }
+# Runtime dependencies (both conda-forge and git/PyPI packages) are managed by
+# pixi; see pixi.toml. They are intentionally left out here so that an editable
+# install does not attempt to resolve conda-provided packages (gdal, etc.) from
+# PyPI.
+dependencies = []
+
+[project.scripts]
+"ba_skysat.py" = "skysat_stereo_scripts.ba_skysat:main"
+"compare_dems.py" = "skysat_stereo_scripts.compare_dems:main"
+"optimise_raw_camera.py" = "skysat_stereo_scripts.optimise_raw_camera:main"
+"plot_disparity.py" = "skysat_stereo_scripts.plot_disparity:main"
+"prep_dense_ba_run.py" = "skysat_stereo_scripts.prep_dense_ba_run:main"
+"reformat_frameindex.py" = "skysat_stereo_scripts.reformat_frameindex:main"
+"skysat_dem_mos.py" = "skysat_stereo_scripts.skysat_dem_mos:main"
+"skysat_orthorectify.py" = "skysat_stereo_scripts.skysat_orthorectify:main"
+"skysat_overlap.py" = "skysat_stereo_scripts.skysat_overlap:main"
+"skysat_pc_cam.py" = "skysat_stereo_scripts.skysat_pc_cam:main"
+"skysat_preprocess.py" = "skysat_stereo_scripts.skysat_preprocess:main"
+"skysat_stereo_cli.py" = "skysat_stereo_scripts.skysat_stereo_cli:main"
+"skysat_triplet_pipeline.py" = "skysat_stereo_scripts.skysat_triplet_pipeline:main"
+"skysat_video_pipeline.py" = "skysat_stereo_scripts.skysat_video_pipeline:main"
+
+[tool.setuptools]
+packages = ["skysat_stereo", "skysat_stereo_scripts"]
+
+[tool.setuptools.package-data]
+skysat_stereo = ["*.cpt"]
+
+[tool.setuptools.package-dir]
+skysat_stereo = "skysat_stereo"
+skysat_stereo_scripts = "scripts"
