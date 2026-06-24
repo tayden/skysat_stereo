@@ -11,6 +11,7 @@ from skysat_stereo import skysat
 from skysat_stereo import asp_utils as asp
 from rpcm import geo
 from skysat_stereo import misc_geospatial as misc
+from skysat_stereo import plot_utils as pltlib
 from shapely.geometry import Polygon
 import itertools
 from osgeo import osr
@@ -522,7 +523,7 @@ def gridding_wrapper(pc_list,tr,tsrs=None):
         pc_center = os.path.splitext(pc_list[0])[0]+'-center.txt'
         with open(pc_center,'r') as f:
             content = f.readlines()
-        X,Y,Z = [np.float(x) for x in content[0].split(' ')[:-1]]
+        X,Y,Z = [float(x) for x in content[0].split(' ')[:-1]]
         ecef_proj = 'EPSG:4978'
         geo_proj = 'EPSG:4326'
         ecef2wgs = Transformer.from_crs(ecef_proj,geo_proj)

@@ -246,7 +246,7 @@ def video_mvs(img_folder,t,cam_fol=None,ba_prefix=None,dem=None,sampling_interva
         cam_list = [glob.glob(os.path.join(cam_fol, frame + '*.tsai'))[0] for frame in frame_index.name.values]
     num_pairs = 20 # can be accepted as input
     # Compute equally spaced indices for the master images to be chosen
-    ref_idx = np.linspace(0,len(img_list)-1-num_pairs,sampling_interval,dtype=np.int)
+    ref_idx = np.linspace(0,len(img_list)-1-num_pairs,sampling_interval,dtype=int)
     source_idexs = [list(np.arange(idx+1,idx+1+num_pairs)) for idx in ref_idx] #this is list of list containing source_ids for corresponding reference_id
     if os.path.islink(img_list[0]):
         symlink = True
@@ -372,7 +372,7 @@ def prep_video_stereo_jobs(img_folder,t,threads=4,cam_fol=None,ba_prefix=None,de
     if (min_sec > 10) & full_extent:
         #need to maintain 10 seconds interval minimum
         #stereo resulst are poor for lower intervals than that
-        secondary_interval = np.int(np.round(10/succesive_sec))
+        secondary_interval = int(np.round(10/succesive_sec))
         print("will buffer start and end frames with interval of {}".format(secondary_interval))
         end_point1 = source_idx[0]-secondary_interval
         ref_1 = np.linspace(ref_idx[0],end_point1,num=end_point1-ref_idx[0]+1,dtype=int)

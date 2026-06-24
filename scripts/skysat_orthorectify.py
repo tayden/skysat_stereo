@@ -7,7 +7,6 @@ from skysat_stereo import asp_utils as asp
 from skysat_stereo import skysat
 from skysat_stereo import skysat_stereo_workflow as workflow
 from p_tqdm import p_map
-from imview import pltlib
 import itertools
 import ast
 import matplotlib.pyplot as plt

@@ -71,15 +71,15 @@ def read_tsai_dict(tsai):
     with open(tsai,'r') as f:
         content = f.readlines()
     content = [x.strip() for x in content]
-    fu = np.float(content[2].split(' = ',4)[1]) # focal length in x
-    fv = np.float(content[3].split(' = ',4)[1]) # focal length in y
-    cu = np.float(content[4].split(' = ',4)[1]) # optical center in x
-    cv = np.float(content[5].split(' = ',4)[1]) # optical center in y
+    fu = float(content[2].split(' = ',4)[1]) # focal length in x
+    fv = float(content[3].split(' = ',4)[1]) # focal length in y
+    cu = float(content[4].split(' = ',4)[1]) # optical center in x
+    cv = float(content[5].split(' = ',4)[1]) # optical center in y
     cam = content[9].split(' = ',10)[1].split(' ')
-    cam_cen = [np.float(x) for x in cam] # camera center coordinates in ECEF
+    cam_cen = [float(x) for x in cam] # camera center coordinates in ECEF
     rot = content[10].split(' = ',10)[1].split(' ')
-    rot_mat = [np.float(x) for x in rot] # rotation matrix for camera to world coordinates transformation
-    pitch = np.float(content[11].split(' = ',10)[1]) # pixel pitch
+    rot_mat = [float(x) for x in rot] # rotation matrix for camera to world coordinates transformation
+    pitch = float(content[11].split(' = ',10)[1]) # pixel pitch
     
     ecef_proj = 'EPSG:4978'
     geo_proj = 'EPSG:4326'
@@ -619,7 +619,7 @@ def get_total_shift(pc_align_log):
         content = f.readlines()
     substring = 'Maximum displacement of points between the source cloud with any initial transform applied to it and the source cloud after alignment to the reference'
     max_alignment_string = [i for i in content if substring in i]
-    total_shift = np.float(max_alignment_string[0].split(':',15)[-1].split('m')[0])
+    total_shift = float(max_alignment_string[0].split(':',15)[-1].split('m')[0])
     return total_shift
 
 def dem_align(ref_dem, source_dem, max_displacement, outprefix, align, trans_only=False, threads=n_cpu,initial_align=None):
@@ -765,8 +765,8 @@ def read_pc_align_transform(transformation):
     r21, r22, r23, t2 = ' '.join(content[1].split()).split(' ', 15)
     r31, r32, r33, t3 = ' '.join(content[2].split()).split(' ', 15)
     pc_align_rot = np.reshape(np.array(
-        [np.float(x) for x in [r11, r12, r13, r21, r22, r23, r31, r32, r33]]), (3, 3))
-    pc_align_trans = np.array([np.float(x) for x in [t1, t2, t3]])
+        [float(x) for x in [r11, r12, r13, r21, r22, r23, r31, r32, r33]]), (3, 3))
+    pc_align_trans = np.array([float(x) for x in [t1, t2, t3]])
     return pc_align_trans, pc_align_rot
 
 def align_cameras(pinhole_tsai, transform, outfolder='None',write=True, rpc=False, dem=None, gsd=None, img=False):
@@ -832,8 +832,8 @@ def read_px_error(content_line,idx):
     """
     pts_array = np.array(content_line)[idx]
     pts = np.char.split(pts_array,', ')
-    px = np.array([np.float(x[0]) for x in pts])
-    py = np.array([np.float(x[1]) for x in pts])
+    px = np.array([float(x[0]) for x in pts])
+    py = np.array([float(x[1]) for x in pts])
     return px,py
 
 def compute_cam_px_reproj_err_stats(content_line,idx):

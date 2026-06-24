@@ -3,7 +3,7 @@ import os,sys,glob
 import pandas as pd
 import numpy as np
 from pygeotools.lib import iolib,geolib,malib,warplib
-import gdal
+from osgeo import gdal
 import matplotlib.pyplot as plt
 import argparse
 import geopandas as gpd

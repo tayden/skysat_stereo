@@ -231,7 +231,7 @@ def main():
         df['dt'] = [datetime.strptime(date.split('+00:00')[0],'%Y-%m-%dT%H:%M:%S.%f') for date in df.datetime.values]
         delta = (df.dt.values[1]-df.dt.values[0])/np.timedelta64(1, 's')
         # i hardocde overlap limit to have 40 seconds coverage
-        overlap_limit = np.int(np.ceil(40/delta))
+        overlap_limit = int(np.ceil(40/delta))
         print("Calculated overlap limit as {}".format(overlap_limit))
 
         img_list = [glob.glob(os.path.join(img,'*{}*.tiff'.format(x)))[0] for x in df.name.values]
