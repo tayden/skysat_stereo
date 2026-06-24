@@ -2,7 +2,6 @@
 import os,sys,glob,shutil
 import subprocess
 import argparse
-from distutils.spawn import find_executable
 from pygeotools.lib import iolib,malib
 import geopandas as gpd
 import numpy as np
@@ -17,10 +16,8 @@ from multiprocessing import cpu_count
 
 
 def run_cmd(bin, args, **kw):
-    # Note, need to add full executable
-    # from dshean/vmap.py
-    #binpath = os.path.join('/home/sbhushan/src/StereoPipeline/bin',bin)
-    binpath = find_executable(bin)
+    # Resolve the ASP executable from PATH (the pixi/conda env provides it).
+    binpath = shutil.which(bin)
     if binpath is None:
         msg = ("Unable to find executable %s\n"
         "Install ASP and ensure it is in your PATH env variable\n"
@@ -38,7 +35,7 @@ def run_cmd(bin, args, **kw):
     except OSError as e:
         raise Exception('%s: %s' % (binpath, e))
     if code != 0:
-        raise Exception('ASP step ' + kw['msg'] + ' failed')
+        raise Exception('ASP step %s (%s) failed with code %d' % (kw.get('msg', bin), binpath, code))
 
 
 def get_ba_opts(ba_prefix, ip_per_tile=4000,camera_weight=None,translation_weight=0.4,rotation_weight=0,fixed_cam_idx=None,overlap_list=None, robust_threshold=None, overlap_limit=None, initial_transform=None, input_adjustments=None, flavor='general_ba', session='nadirpinhole', gcp_transform=False,num_iterations=2000,num_pass=2,lon_lat_limit=None,elevation_limit=None):
@@ -59,10 +56,11 @@ def get_ba_opts(ba_prefix, ip_per_tile=4000,camera_weight=None,translation_weigh
     ba_opt.extend(['--skip-rough-homography'])
     ba_opt.extend(['--min-triangulation-angle', '0.0001'])
 
-    # Save control network created from match points
-    ba_opt.extend(['--save-cnet-as-csv'])
+    # Note: ASP 3.7 removed --save-cnet-as-csv. This script only consumes the
+    # auto-generated residual pointmap/raw-pixel files, not the control-network
+    # CSV, so the flag is simply dropped.
 
-    # Individually normalize images to properly stretch constrant 
+    # Individually normalize images to properly stretch constrant
     # Helpful in keypoint detection
     ba_opt.extend(['--individually-normalize'])
 
@@ -261,16 +259,16 @@ def main():
         run_cmd('bundle_adjust', round1_opts+ba_args)
        
         # Make files used to evaluate solution quality
-        init_residual_fn_def = sorted(glob.glob(ba_prefix+'*initial*no_loss_*pointmap*.csv'))[0]
-        init_per_cam_reproj_err = sorted(glob.glob(ba_prefix+'-*initial_residuals_no_loss_function_raw_pixels.txt'))[0]
+        init_residual_fn_def = sorted(glob.glob(ba_prefix+'*initial*residuals*pointmap*.csv'))[0]
+        init_per_cam_reproj_err = sorted(glob.glob(ba_prefix+'-*initial_residuals*raw_pixels.txt'))[0]
         init_per_cam_reproj_err_disk = os.path.splitext(init_per_cam_reproj_err)[0]+'_initial_per_cam_reproj_error.txt'
         init_residual_fn = os.path.splitext(init_residual_fn_def)[0]+'_initial_reproj_error.csv' 
         shutil.copy2(init_residual_fn_def,init_residual_fn)
         shutil.copy2(init_per_cam_reproj_err,init_per_cam_reproj_err_disk)
         # Copy final reprojection error files before transforming cameras
-        final_residual_fn_def = sorted(glob.glob(ba_prefix+'*final*no_loss_*pointmap*.csv'))[0]
+        final_residual_fn_def = sorted(glob.glob(ba_prefix+'*final*residuals*pointmap*.csv'))[0]
         final_residual_fn = os.path.splitext(final_residual_fn_def)[0]+'_final_reproj_error.csv'
-        final_per_cam_reproj_err = sorted(glob.glob(ba_prefix+'-*final_residuals_no_loss_function_raw_pixels.txt'))[0]
+        final_per_cam_reproj_err = sorted(glob.glob(ba_prefix+'-*final_residuals*raw_pixels.txt'))[0]
         final_per_cam_reproj_err_disk = os.path.splitext(final_per_cam_reproj_err)[0]+'_final_per_cam_reproj_error.txt'
         shutil.copy2(final_residual_fn_def,final_residual_fn)
         shutil.copy2(final_per_cam_reproj_err,final_per_cam_reproj_err_disk)
@@ -320,9 +318,9 @@ def main():
         run_cmd('bundle_adjust', round1_opts+ba_args)
 
         # Save the first and foremost bundle adjustment reprojection error file
-        init_residual_fn_def = sorted(glob.glob(ba_prefix+'*initial*no_loss_*pointmap*.csv'))[0]
+        init_residual_fn_def = sorted(glob.glob(ba_prefix+'*initial*residuals*pointmap*.csv'))[0]
         init_residual_fn = os.path.splitext(init_residual_fn_def)[0]+'_initial_reproj_error.csv' 
-        init_per_cam_reproj_err = sorted(glob.glob(ba_prefix+'-*initial_residuals_no_loss_function_raw_pixels.txt'))[0]
+        init_per_cam_reproj_err = sorted(glob.glob(ba_prefix+'-*initial_residuals*raw_pixels.txt'))[0]
         init_per_cam_reproj_err_disk = os.path.splitext(init_per_cam_reproj_err)[0]+'_initial_per_cam_reproj_error.txt'
         shutil.copy2(init_residual_fn_def,init_residual_fn)
         shutil.copy2(init_per_cam_reproj_err,init_per_cam_reproj_err_disk)
@@ -347,10 +345,10 @@ def main():
         run_cmd('bundle_adjust', round2_opts+ba_args)
 
         # Save state for final condition reprojection errors for the sparse triangulated points
-        final_residual_fn_def = sorted(glob.glob(ba_prefix+'*final*no_loss_*pointmap*.csv'))[0]
+        final_residual_fn_def = sorted(glob.glob(ba_prefix+'*final*residuals*pointmap*.csv'))[0]
         final_residual_fn = os.path.splitext(final_residual_fn_def)[0]+'_final_reproj_error.csv'
         shutil.copy2(final_residual_fn_def,final_residual_fn)
-        final_per_cam_reproj_err = sorted(glob.glob(ba_prefix+'-*final_residuals_no_loss_function_raw_pixels.txt'))[0]
+        final_per_cam_reproj_err = sorted(glob.glob(ba_prefix+'-*final_residuals*raw_pixels.txt'))[0]
         final_per_cam_reproj_err_disk = os.path.splitext(final_per_cam_reproj_err)[0]+'_final_per_cam_reproj_error.txt'
         shutil.copy2(final_per_cam_reproj_err,final_per_cam_reproj_err_disk)
 
